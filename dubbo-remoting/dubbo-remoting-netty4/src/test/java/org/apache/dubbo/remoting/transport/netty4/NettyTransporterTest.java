@@ -51,6 +51,7 @@ public class NettyTransporterTest {
         URL url = new URL("http", "localhost", port,
                 new String[]{Constants.BIND_PORT_KEY, String.valueOf(port)});
 
+        // 服务端绑定端口
         new NettyTransporter().bind(url, new ChannelHandlerAdapter() {
 
             @Override
@@ -58,6 +59,7 @@ public class NettyTransporterTest {
                 lock.countDown();
             }
         });
+        // 客户端连接服务器
         new NettyTransporter().connect(url, new ChannelHandlerAdapter() {
             @Override
             public void sent(Channel channel, Object message) throws RemotingException {
