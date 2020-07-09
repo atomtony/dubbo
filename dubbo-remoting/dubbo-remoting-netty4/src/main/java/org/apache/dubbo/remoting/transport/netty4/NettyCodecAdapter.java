@@ -35,8 +35,10 @@ import java.util.List;
  */
 final public class NettyCodecAdapter {
 
+    // 内部编码器
     private final ChannelHandler encoder = new InternalEncoder();
 
+    // 内部解码器
     private final ChannelHandler decoder = new InternalDecoder();
 
     private final Codec2 codec;
@@ -65,10 +67,13 @@ final public class NettyCodecAdapter {
         protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
             org.apache.dubbo.remoting.buffer.ChannelBuffer buffer = new NettyBackedChannelBuffer(out);
             Channel ch = ctx.channel();
+            // 封装Channel，内部维护了线程安装缓存池，
             NettyChannel channel = NettyChannel.getOrAddChannel(ch, url, handler);
             try {
+                // 将对象编码到为字节，缓存到ByteBuf out中。
                 codec.encode(channel, buffer, msg);
             } finally {
+                // 如果链接断开从缓冲池中移除
                 NettyChannel.removeChannelIfDisconnected(ch);
             }
         }
@@ -87,6 +92,7 @@ final public class NettyCodecAdapter {
                 // decode object.
                 do {
                     int saveReaderIndex = message.readerIndex();
+                    // 反序列化
                     Object msg = codec.decode(channel, message);
                     if (msg == Codec2.DecodeResult.NEED_MORE_INPUT) {
                         message.readerIndex(saveReaderIndex);

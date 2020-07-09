@@ -106,6 +106,7 @@ public class NettyClient extends AbstractClient {
 
             @Override
             protected void initChannel(Channel ch) throws Exception {
+                // 获取心跳间隔，默认60秒
                 int heartbeatInterval = UrlUtils.getHeartbeat(getUrl());
                 NettyCodecAdapter adapter = new NettyCodecAdapter(getCodec(), getUrl(), NettyClient.this);
                 ch.pipeline()//.addLast("logging",new LoggingHandler(LogLevel.INFO))//for debug

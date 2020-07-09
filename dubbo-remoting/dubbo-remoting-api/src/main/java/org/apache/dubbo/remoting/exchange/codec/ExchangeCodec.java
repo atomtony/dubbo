@@ -44,19 +44,26 @@ import java.io.InputStream;
 /**
  * ExchangeCodec.
  */
+// 参考 https://blog.csdn.net/fd2025/article/details/80001729
 public class ExchangeCodec extends TelnetCodec {
 
     // header length.
     protected static final int HEADER_LENGTH = 16;
     // magic header.
     protected static final short MAGIC = (short) 0xdabb;
+    // 魔法数的高字节
     protected static final byte MAGIC_HIGH = Bytes.short2bytes(MAGIC)[0];
+    // 魔法数的低字节
     protected static final byte MAGIC_LOW = Bytes.short2bytes(MAGIC)[1];
     // message flag.
+    // 单向请求
     protected static final byte FLAG_REQUEST = (byte) 0x80;
+    // 双向请求
     protected static final byte FLAG_TWOWAY = (byte) 0x40;
+    // 心跳PING事件
     protected static final byte FLAG_EVENT = (byte) 0x20;
     protected static final int SERIALIZATION_MASK = 0x1f;
+    //
     private static final Logger logger = LoggerFactory.getLogger(ExchangeCodec.class);
 
     public Short getMagicCode() {
@@ -77,23 +84,30 @@ public class ExchangeCodec extends TelnetCodec {
     @Override
     public Object decode(Channel channel, ChannelBuffer buffer) throws IOException {
         int readable = buffer.readableBytes();
+        // 缓存头数据
         byte[] header = new byte[Math.min(readable, HEADER_LENGTH)];
+        // 读头数据
         buffer.readBytes(header);
+        // 解析
         return decode(channel, buffer, readable, header);
     }
 
     @Override
     protected Object decode(Channel channel, ChannelBuffer buffer, int readable, byte[] header) throws IOException {
         // check magic number.
+        // 判断魔法数不相等时
         if (readable > 0 && header[0] != MAGIC_HIGH
                 || readable > 1 && header[1] != MAGIC_LOW) {
             int length = header.length;
+            // 读取剩余可读的数据，也就是大于header.length那部分
             if (header.length < readable) {
                 header = Bytes.copyOf(header, readable);
                 buffer.readBytes(header, length, readable - length);
             }
+            // 逐字节移动判断魔法数，
             for (int i = 1; i < header.length - 1; i++) {
                 if (header[i] == MAGIC_HIGH && header[i + 1] == MAGIC_LOW) {
+                    // 重置读下标
                     buffer.readerIndex(buffer.readerIndex() - header.length + i);
                     header = Bytes.copyOf(header, i);
                     break;
@@ -107,9 +121,12 @@ public class ExchangeCodec extends TelnetCodec {
         }
 
         // get data length.
+        // 获取数据域长度
         int len = Bytes.bytes2int(header, 12);
+        // 检查数据域长度是否超过数据长度
         checkPayload(channel, len);
 
+        // 总长度header.length+body.length
         int tt = len + HEADER_LENGTH;
         if (readable < tt) {
             return DecodeResult.NEED_MORE_INPUT;
@@ -135,19 +152,27 @@ public class ExchangeCodec extends TelnetCodec {
     }
 
     protected Object decodeBody(Channel channel, InputStream is, byte[] header) throws IOException {
+        // 获取flag，总共8Bit，
+        // 高3Bit分辨表示FLAG_REQUEST、FLAG_TWOWAY、FLAG_EVENT
+        // 低5Bit表示序列化类型
         byte flag = header[2], proto = (byte) (flag & SERIALIZATION_MASK);
         // get request id.
+        // 获取请ID
         long id = Bytes.bytes2long(header, 4);
         if ((flag & FLAG_REQUEST) == 0) {
             // decode response.
+            // 解码相应
             Response res = new Response(id);
             if ((flag & FLAG_EVENT) != 0) {
+                // 设置事件响应为true
                 res.setEvent(true);
             }
             // get status.
+            // 解析状态、设置状态
             byte status = header[3];
             res.setStatus(status);
             try {
+                // 根据序列化类型返回对象流
                 ObjectInput in = CodecSupport.deserialize(channel.getUrl(), is, proto);
                 if (status == Response.OK) {
                     Object data;
