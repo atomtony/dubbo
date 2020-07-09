@@ -29,6 +29,11 @@ import org.apache.dubbo.remoting.transport.AbstractChannelHandlerDelegate;
 
 import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
 
+/**
+ * 功能：更新读写时间戳，发送心跳相应，传递数据到AllChannelHandler处理器
+ * 持有AllChannelHandler处理器
+ * @see org.apache.dubbo.remoting.transport.dispatcher.all.AllChannelHandler
+ */
 public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
 
     private static final Logger logger = LoggerFactory.getLogger(HeartbeatHandler.class);
@@ -43,6 +48,7 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
 
     @Override
     public void connected(Channel channel) throws RemotingException {
+        // 创建链接后，缓存读写时间戳
         setReadTimestamp(channel);
         setWriteTimestamp(channel);
         handler.connected(channel);
@@ -50,6 +56,7 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
 
     @Override
     public void disconnected(Channel channel) throws RemotingException {
+        // 断开链接，删除缓存的读写时间戳
         clearReadTimestamp(channel);
         clearWriteTimestamp(channel);
         handler.disconnected(channel);
@@ -57,14 +64,17 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
 
     @Override
     public void sent(Channel channel, Object message) throws RemotingException {
+        // 每次发送都更新写时间
         setWriteTimestamp(channel);
         handler.sent(channel, message);
     }
 
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
+        // 每次读到数据，更新读时间
         setReadTimestamp(channel);
         if (isHeartbeatRequest(message)) {
+            // 如果是心跳请求，发送心跳响应
             Request req = (Request) message;
             if (req.isTwoWay()) {
                 Response res = new Response(req.getId(), req.getVersion());
@@ -82,6 +92,7 @@ public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
             return;
         }
         if (isHeartbeatResponse(message)) {
+            // 如果是心跳相应，不做任何处理
             if (logger.isDebugEnabled()) {
                 logger.debug("Receive heartbeat response in thread " + Thread.currentThread().getName());
             }

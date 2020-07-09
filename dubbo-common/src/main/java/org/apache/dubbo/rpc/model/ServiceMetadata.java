@@ -30,14 +30,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ServiceMetadata extends BaseServiceMetadata {
 
+    // 默认组
     private String defaultGroup;
+    // 接口类
     private Class<?> serviceType;
-
+    // 接口实现类
     private Object target;
 
     /* will be transferred to remote side */
+    // 请求时发送到对端的附加属性
     private final Map<String, Object> attachments = new ConcurrentHashMap<String, Object>();
     /* used locally*/
+    // 本地服务属性
     private final Map<String, Object> attributeMap = new ConcurrentHashMap<String, Object>();
 
     public ServiceMetadata(String serviceInterfaceName, String group, String version, Class<?> serviceType) {

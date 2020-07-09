@@ -22,8 +22,9 @@ import org.apache.dubbo.remoting.RemotingException;
 import org.apache.dubbo.remoting.exchange.support.MultiMessage;
 
 /**
- *
+ * 持有了HeartbeatHandler处理器
  * @see MultiMessage
+ * @see org.apache.dubbo.remoting.exchange.support.header.HeartbeatHandler
  */
 public class MultiMessageHandler extends AbstractChannelHandlerDelegate {
 

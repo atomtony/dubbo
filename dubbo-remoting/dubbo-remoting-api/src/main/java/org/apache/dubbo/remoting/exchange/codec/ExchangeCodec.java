@@ -116,6 +116,7 @@ public class ExchangeCodec extends TelnetCodec {
         }
 
         // limit input stream.
+        // 标记了buffer读取的开始和结束位置
         ChannelBufferInputStream is = new ChannelBufferInputStream(buffer, len);
 
         try {

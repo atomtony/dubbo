@@ -32,10 +32,16 @@ import java.util.Set;
  * We should merge them in the future.
  */
 public class ServiceDescriptor {
+    // 接口名称
     private final String serviceName;
+    // 接口类
     private final Class<?> serviceInterfaceClass;
     // to accelerate search
+    // Key：接口方法名称，Value：接口中方法描述列表
     private final Map<String, List<MethodDescriptor>> methods = new HashMap<>();
+    // Key1：接口方法名称，
+    // Key2：参数列表类型用冒号分开（Ljava/lang/String;Ljava/lang/Integer;）
+    // Value2：方法描述
     private final Map<String, Map<String, MethodDescriptor>> descToMethods = new HashMap<>();
 
     public ServiceDescriptor(Class<?> interfaceClass) {
@@ -45,8 +51,10 @@ public class ServiceDescriptor {
     }
 
     private void initMethods() {
+        // 获取接口类暴露的方法
         Method[] methodsToExport = this.serviceInterfaceClass.getMethods();
         for (Method method : methodsToExport) {
+            // 设置所有方法可访问
             method.setAccessible(true);
 
             List<MethodDescriptor> methodModels = methods.computeIfAbsent(method.getName(), (k) -> new ArrayList<>(1));

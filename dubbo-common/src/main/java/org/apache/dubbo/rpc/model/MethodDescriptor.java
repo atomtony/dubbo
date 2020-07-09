@@ -29,15 +29,23 @@ import static org.apache.dubbo.common.constants.CommonConstants.$INVOKE_ASYNC;
  *
  */
 public class MethodDescriptor {
+    // 接口方法对象
     private final Method method;
     //    private final boolean isCallBack;
 //    private final boolean isFuture;
+
+    // 方法参数类型列表：（Ljava/lang/String;Ljava/lang/Integer;）
     private final String paramDesc;
     // duplicate filed as paramDesc, but with different format.
+    // 参数类型数组
     private final String[] compatibleParamSignatures;
+    // 参数类数组
     private final Class<?>[] parameterClasses;
+    // 返回值类
     private final Class<?> returnClass;
+    // 返回值类型
     private final Type[] returnTypes;
+    // 方法名称
     private final String methodName;
     private final boolean generic;
 

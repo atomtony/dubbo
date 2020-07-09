@@ -116,6 +116,7 @@ public class DubboProtocol extends AbstractProtocol {
                         + ", channel: consumer: " + channel.getRemoteAddress() + " --> provider: " + channel.getLocalAddress());
             }
 
+            // 一次解码时创建Invocation
             Invocation inv = (Invocation) message;
             Invoker<?> invoker = getInvoker(channel, inv);
             // need to consider backward-compatibility if it's a callback
@@ -237,6 +238,7 @@ public class DubboProtocol extends AbstractProtocol {
         boolean isCallBackServiceInvoke = false;
         boolean isStubServiceInvoke = false;
         int port = channel.getLocalAddress().getPort();
+        // 获取接口地址
         String path = (String) inv.getObjectAttachments().get(PATH_KEY);
 
         // if it's callback service on client side
@@ -251,13 +253,14 @@ public class DubboProtocol extends AbstractProtocol {
             path += "." + inv.getObjectAttachments().get(CALLBACK_SERVICE_KEY);
             inv.getObjectAttachments().put(IS_CALLBACK_SERVICE_INVOKE, Boolean.TRUE.toString());
         }
-
+        // 接口名称:端口号
         String serviceKey = serviceKey(
-                port,
-                path,
-                (String) inv.getObjectAttachments().get(VERSION_KEY),
-                (String) inv.getObjectAttachments().get(GROUP_KEY)
+                port,// 请求服务端口号
+                path,// 接口地址
+                (String) inv.getObjectAttachments().get(VERSION_KEY),// 接口版本号
+                (String) inv.getObjectAttachments().get(GROUP_KEY)// 接口组
         );
+        //
         DubboExporter<?> exporter = (DubboExporter<?>) exporterMap.get(serviceKey);
 
         if (exporter == null) {

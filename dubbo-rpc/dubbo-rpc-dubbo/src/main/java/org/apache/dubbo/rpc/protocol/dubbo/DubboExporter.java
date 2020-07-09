@@ -27,8 +27,10 @@ import java.util.Map;
  */
 public class DubboExporter<T> extends AbstractExporter<T> {
 
+    // 接口名称:端口号
     private final String key;
 
+    //
     private final Map<String, Exporter<?>> exporterMap;
 
     public DubboExporter(Invoker<T> invoker, String key, Map<String, Exporter<?>> exporterMap) {

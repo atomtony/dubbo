@@ -43,6 +43,7 @@ final public class NettyCodecAdapter {
 
     private final URL url;
 
+    // hander的实例是NettyClient或NettyServer，这两个类都继承了org.apache.dubbo.remoting.ChannelHandler
     private final org.apache.dubbo.remoting.ChannelHandler handler;
 
     public NettyCodecAdapter(Codec2 codec, URL url, org.apache.dubbo.remoting.ChannelHandler handler) {

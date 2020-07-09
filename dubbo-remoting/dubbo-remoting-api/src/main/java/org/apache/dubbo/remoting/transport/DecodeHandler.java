@@ -26,6 +26,11 @@ import org.apache.dubbo.remoting.RemotingException;
 import org.apache.dubbo.remoting.exchange.Request;
 import org.apache.dubbo.remoting.exchange.Response;
 
+/**
+ * 功能：二次编解码，饭序列化为对象
+ * 持有了HeaderExchangeHandler处理器
+ * @see org.apache.dubbo.remoting.exchange.support.header.HeaderExchangeHandler
+ */
 public class DecodeHandler extends AbstractChannelHandlerDelegate {
 
     private static final Logger log = LoggerFactory.getLogger(DecodeHandler.class);

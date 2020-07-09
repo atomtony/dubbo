@@ -40,7 +40,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.READONLY_EVENT;
 
 
 /**
- * ExchangeReceiver
+ *
+ * 持有了DubboProtocol内置私有属性requestHandler
+ * @see org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol
+ *
  */
 public class HeaderExchangeHandler implements ChannelHandlerDelegate {
 
@@ -76,6 +79,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
     }
 
     void handleRequest(final ExchangeChannel channel, Request req) throws RemotingException {
+        // 创建响应
         Response res = new Response(req.getId(), req.getVersion());
         if (req.isBroken()) {
             Object data = req.getData();

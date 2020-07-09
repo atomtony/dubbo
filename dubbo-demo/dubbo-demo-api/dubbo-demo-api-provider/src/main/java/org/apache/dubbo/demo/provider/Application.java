@@ -40,6 +40,8 @@ public class Application {
     private static void startWithBootstrap() {
         ServiceConfig<DemoServiceImpl> service = new ServiceConfig<>();
         service.setInterface(DemoService.class);
+        service.setVersion("v1");
+        service.setGroup("goup1");
         service.setRef(new DemoServiceImpl());
 
         DubboBootstrap bootstrap = DubboBootstrap.getInstance();

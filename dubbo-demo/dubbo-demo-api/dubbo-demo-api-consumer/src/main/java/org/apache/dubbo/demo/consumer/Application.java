@@ -49,7 +49,7 @@ public class Application {
                 .start();
 
         DemoService demoService = ReferenceConfigCache.getCache().get(reference);
-        String message = demoService.sayHello("dubbo");
+        String message = demoService.sayHello("dubbo",12);
         System.out.println(message);
 
         // generic invoke
@@ -65,7 +65,7 @@ public class Application {
         reference.setRegistry(new RegistryConfig("zookeeper://127.0.0.1:2181"));
         reference.setInterface(DemoService.class);
         DemoService service = reference.get();
-        String message = service.sayHello("dubbo");
+        String message = service.sayHello("dubbo",12);
         System.out.println(message);
 
     }

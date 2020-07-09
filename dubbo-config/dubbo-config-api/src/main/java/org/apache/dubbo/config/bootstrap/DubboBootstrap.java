@@ -183,10 +183,14 @@ public class DubboBootstrap extends GenericEventListener {
     }
 
     private DubboBootstrap() {
+        // 创建配置管理器
         configManager = ApplicationModel.getConfigManager();
+        // 创建环境变量管理器
         environment = ApplicationModel.getEnvironment();
 
+        // 注册应用程序关闭钩子
         DubboShutdownHook.getDubboShutdownHook().register();
+        // 设置应用程序关闭钩子回调
         ShutdownHookCallbacks.INSTANCE.addCallback(new ShutdownHookCallback() {
             @Override
             public void callback() throws Throwable {
@@ -746,6 +750,7 @@ public class DubboBootstrap extends GenericEventListener {
                 logger.info(NAME + " is starting...");
             }
             // 1. export Dubbo Services
+            // 暴露所有接口服务
             exportServices();
 
             // Not only provider register
@@ -927,11 +932,14 @@ public class DubboBootstrap extends GenericEventListener {
     }
 
     private void exportServices() {
+        // 遍历所有接口配置
         configManager.getServices().forEach(sc -> {
             // TODO, compatible with ServiceConfig.export()
+
             ServiceConfig serviceConfig = (ServiceConfig) sc;
             serviceConfig.setBootstrap(this);
 
+            // 异步暴露服务
             if (exportAsync) {
                 ExecutorService executor = executorRepository.getServiceExporterExecutor();
                 Future<?> future = executor.submit(() -> {
@@ -940,6 +948,7 @@ public class DubboBootstrap extends GenericEventListener {
                 });
                 asyncExportingFutures.add(future);
             } else {
+                // 同步暴露服务
                 sc.export();
                 exportedServices.add(sc);
             }

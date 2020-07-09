@@ -33,8 +33,11 @@ import java.util.Set;
  * ProviderModel is about published services
  */
 public class ProviderModel {
+    // 服务组/服务名称:服务版本号)
     private String serviceKey;
+    // 接口实现类
     private final Object serviceInstance;
+    // 接口描述
     private final ServiceDescriptor serviceModel;
     private final ServiceConfigBase<?> serviceConfig;
     private final List<RegisterStatedURL> urls;

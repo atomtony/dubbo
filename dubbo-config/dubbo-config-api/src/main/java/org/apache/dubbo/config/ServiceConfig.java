@@ -193,6 +193,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         checkAndUpdateSubConfigs();
 
         //init serviceMetadata
+        // 初始化服务元数据，服务版本号、分组、接口类、接口名称
         serviceMetadata.setVersion(version);
         serviceMetadata.setGroup(group);
         serviceMetadata.setDefaultGroup(group);
@@ -302,8 +303,11 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls() {
+        // 服务仓库
         ServiceRepository repository = ApplicationModel.getServiceRepository();
+        // 通过接口类获取服务描述
         ServiceDescriptor serviceDescriptor = repository.registerService(getInterfaceClass());
+        // 仓库注册服务提供者
         repository.registerProvider(
                 getUniqueServiceName(),
                 ref,
@@ -312,13 +316,16 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                 serviceMetadata
         );
 
+        // 解析注册中心地址
         List<URL> registryURLs = ConfigValidationUtils.loadRegistries(this, true);
 
         for (ProtocolConfig protocolConfig : protocols) {
+            // 服务组/接口名称:服务版本号
             String pathKey = URL.buildKey(getContextPath(protocolConfig)
                     .map(p -> p + "/" + path)
                     .orElse(path), group, version);
             // In case user specified path, register service one more time to map it to path.
+            // 注册对的Key:服务组/接口名称:服务版本号
             repository.registerService(pathKey, interfaceClass);
             // TODO, uncomment this line once service key is unified
             serviceMetadata.setServiceKey(pathKey);

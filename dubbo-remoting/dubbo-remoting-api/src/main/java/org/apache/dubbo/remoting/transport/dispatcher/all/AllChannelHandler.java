@@ -29,6 +29,12 @@ import org.apache.dubbo.remoting.transport.dispatcher.WrappedChannelHandler;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
+/**
+ * 功能：1：提交连接、断开、异常事件任务，
+ *      2：提交请求任务。
+ * 持有DecodeHandler处理器
+ * @see org.apache.dubbo.remoting.transport.DecodeHandler
+ */
 public class AllChannelHandler extends WrappedChannelHandler {
 
     public AllChannelHandler(ChannelHandler handler, URL url) {
@@ -62,6 +68,7 @@ public class AllChannelHandler extends WrappedChannelHandler {
             executor.execute(new ChannelEventRunnable(channel, handler, ChannelState.RECEIVED, message));
         } catch (Throwable t) {
         	if(message instanceof Request && t instanceof RejectedExecutionException){
+        	    // 任务被拒绝，返回拒绝相应
                 sendFeedback(channel, (Request) message, t);
                 return;
         	}
