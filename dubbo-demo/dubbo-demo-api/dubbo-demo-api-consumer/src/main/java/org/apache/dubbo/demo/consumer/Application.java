@@ -67,5 +67,6 @@ public class Application {
         DemoService service = reference.get();
         String message = service.sayHello("dubbo");
         System.out.println(message);
+
     }
 }
