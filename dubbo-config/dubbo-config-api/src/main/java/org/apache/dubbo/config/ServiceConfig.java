@@ -342,6 +342,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         Map<String, String> map = new HashMap<String, String>();
         map.put(SIDE_KEY, PROVIDER_SIDE);
 
+        // 设置了dubbo版本号、Release版本号、当前时间戳，线程id
         ServiceConfig.appendRuntimeParameters(map);
         AbstractConfig.appendParameters(map, getMetrics());
         AbstractConfig.appendParameters(map, getApplication());

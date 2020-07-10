@@ -39,16 +39,15 @@ import java.util.concurrent.CompletionStage;
 import static org.apache.dubbo.common.constants.CommonConstants.READONLY_EVENT;
 
 
-/**
- *
- * 持有了DubboProtocol内置私有属性requestHandler
- * @see org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol
- *
- */
+
 public class HeaderExchangeHandler implements ChannelHandlerDelegate {
 
     protected static final Logger logger = LoggerFactory.getLogger(HeaderExchangeHandler.class);
 
+    /**
+     * 此处的handler是通讯层向应用层传递消息
+     * @see org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol
+     */
     private final ExchangeHandler handler;
 
     public HeaderExchangeHandler(ExchangeHandler handler) {
