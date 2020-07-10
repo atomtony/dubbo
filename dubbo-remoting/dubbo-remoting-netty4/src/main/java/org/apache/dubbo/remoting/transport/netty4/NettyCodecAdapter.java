@@ -31,6 +31,9 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * 编解码适配器，
+ * 1、完成了通讯协议编解码
+ * 2、
  * NettyCodecAdapter.
  */
 final public class NettyCodecAdapter {

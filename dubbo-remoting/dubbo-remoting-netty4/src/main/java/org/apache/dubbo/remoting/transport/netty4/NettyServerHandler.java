@@ -34,12 +34,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 处理协议解码消息
  * NettyServerHandler.
  */
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyServerHandler extends ChannelDuplexHandler {
     private static final Logger logger = LoggerFactory.getLogger(NettyServerHandler.class);
     /**
+     * 缓存上线连接channel
+     * 提供了暴露接口，可以广播消息等或者通过查询指定连接发送数据
      * the cache for alive worker channel.
      * <ip:port, dubbo channel>
      */
@@ -47,6 +50,11 @@ public class NettyServerHandler extends ChannelDuplexHandler {
 
     private final URL url;
 
+    /**
+     * 消息通过此handler向后传递
+     * @see org.apache.dubbo.remoting.transport.netty4.NettyServer
+     * @see org.apache.dubbo.remoting.transport.netty4.NettyClient
+     */
     private final ChannelHandler handler;
 
     public NettyServerHandler(URL url, ChannelHandler handler) {
@@ -68,6 +76,7 @@ public class NettyServerHandler extends ChannelDuplexHandler {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         if (channel != null) {
+            // 缓存连接
             channels.put(NetUtils.toAddressString((InetSocketAddress) ctx.channel().remoteAddress()), channel);
         }
         handler.connected(channel);
@@ -81,7 +90,9 @@ public class NettyServerHandler extends ChannelDuplexHandler {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
         try {
+            // 移除连接缓存
             channels.remove(NetUtils.toAddressString((InetSocketAddress) ctx.channel().remoteAddress()));
+            // 断开连接向业务层传递
             handler.disconnected(channel);
         } finally {
             NettyChannel.removeChannel(ctx.channel());

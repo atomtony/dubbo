@@ -28,6 +28,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+/**
+ * 封装Netty缓存ByteBuf，增加了封闭性，Netty底层对ByteBuf的修改只会影响到这个类
+ */
 public class NettyBackedChannelBuffer implements ChannelBuffer {
 
     private ByteBuf buffer;

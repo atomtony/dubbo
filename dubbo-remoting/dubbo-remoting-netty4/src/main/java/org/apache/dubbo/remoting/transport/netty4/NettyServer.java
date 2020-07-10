@@ -55,6 +55,7 @@ public class NettyServer extends AbstractServer implements RemotingServer {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
     /**
+     * 在关闭服务时，遍历连接关闭连接
      * the cache for alive worker channel.
      * <ip:port, dubbo channel>
      */
@@ -93,6 +94,7 @@ public class NettyServer extends AbstractServer implements RemotingServer {
                 "NettyServerWorker");
 
         final NettyServerHandler nettyServerHandler = new NettyServerHandler(getUrl(), this);
+        // 获取到连接缓存引用
         channels = nettyServerHandler.getChannels();
 
         bootstrap.group(bossGroup, workerGroup)
@@ -127,6 +129,7 @@ public class NettyServer extends AbstractServer implements RemotingServer {
     @Override
     protected void doClose() throws Throwable {
         try {
+            // 关闭服务端监听创建的channel
             if (channel != null) {
                 // unbind.
                 channel.close();
@@ -135,6 +138,7 @@ public class NettyServer extends AbstractServer implements RemotingServer {
             logger.warn(e.getMessage(), e);
         }
         try {
+            // 关闭客户端连接服务器缓存的连接
             Collection<org.apache.dubbo.remoting.Channel> channels = getChannels();
             if (channels != null && channels.size() > 0) {
                 for (org.apache.dubbo.remoting.Channel channel : channels) {
@@ -149,6 +153,7 @@ public class NettyServer extends AbstractServer implements RemotingServer {
             logger.warn(e.getMessage(), e);
         }
         try {
+            // 优雅关闭
             if (bootstrap != null) {
                 bossGroup.shutdownGracefully();
                 workerGroup.shutdownGracefully();
@@ -165,6 +170,10 @@ public class NettyServer extends AbstractServer implements RemotingServer {
         }
     }
 
+    /**
+     * 返回链接副本
+     * @return
+     */
     @Override
     public Collection<Channel> getChannels() {
         Collection<Channel> chs = new HashSet<Channel>();
@@ -178,6 +187,11 @@ public class NettyServer extends AbstractServer implements RemotingServer {
         return chs;
     }
 
+    /**
+     * 根据地址，获取单个链接
+     * @param remoteAddress
+     * @return
+     */
     @Override
     public Channel getChannel(InetSocketAddress remoteAddress) {
         return channels.get(NetUtils.toAddressString(remoteAddress));

@@ -33,6 +33,10 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 
 import java.util.concurrent.ThreadFactory;
 
+/**
+ * 根据平台不同选择不同的IO复用模型
+ * linux epoll，windows select
+ */
 public class NettyEventLoopFactory {
     public static EventLoopGroup eventLoopGroup(int threads, String threadFactoryName) {
         ThreadFactory threadFactory = new DefaultThreadFactory(threadFactoryName, true);
