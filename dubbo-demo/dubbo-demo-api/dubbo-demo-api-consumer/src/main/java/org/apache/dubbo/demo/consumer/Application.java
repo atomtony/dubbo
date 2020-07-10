@@ -55,10 +55,10 @@ public class Application {
         System.out.println(message);
 
         // generic invoke
-        GenericService genericService = (GenericService) demoService;
-        Object genericInvokeResult = genericService.$invoke("sayHello", new String[] { String.class.getName() },
-                new Object[] { "dubbo generic invoke" });
-        System.out.println(genericInvokeResult);
+//        GenericService genericService = (GenericService) demoService;
+//        Object genericInvokeResult = genericService.$invoke("sayHello", new String[] { String.class.getName() },
+//                new Object[] { "dubbo generic invoke" });
+//        System.out.println(genericInvokeResult);
     }
 
     private static void runWithRefer() {
