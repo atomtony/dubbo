@@ -57,7 +57,9 @@ public class ConditionRouter extends AbstractRouter {
 
     private static final Logger logger = LoggerFactory.getLogger(ConditionRouter.class);
     protected static final Pattern ROUTE_PATTERN = Pattern.compile("([&!=,]*)\\s*([^&!=,\\s]+)");
+    // 消费者规则
     protected Map<String, MatchPair> whenCondition;
+    // 提供者规则
     protected Map<String, MatchPair> thenCondition;
 
     private boolean enabled;
@@ -83,9 +85,13 @@ public class ConditionRouter extends AbstractRouter {
             }
             rule = rule.replace("consumer.", "").replace("provider.", "");
             int i = rule.indexOf("=>");
+            // 截取消费者规则
             String whenRule = i < 0 ? null : rule.substring(0, i).trim();
+            // 截取提供者规则
             String thenRule = i < 0 ? rule.trim() : rule.substring(i + 2).trim();
+            // 构建消费者规则
             Map<String, MatchPair> when = StringUtils.isBlank(whenRule) || "true".equals(whenRule) ? new HashMap<String, MatchPair>() : parseRule(whenRule);
+            // 构建提供者规则
             Map<String, MatchPair> then = StringUtils.isBlank(thenRule) || "false".equals(thenRule) ? null : parseRule(thenRule);
             // NOTE: It should be determined on the business level whether the `When condition` can be empty or not.
             this.whenCondition = when;
@@ -176,6 +182,7 @@ public class ConditionRouter extends AbstractRouter {
             return invokers;
         }
         try {
+            // 未匹配到消费者，则返回所有提供者
             if (!matchWhen(url, invocation)) {
                 return invokers;
             }
@@ -214,6 +221,7 @@ public class ConditionRouter extends AbstractRouter {
     }
 
     boolean matchWhen(URL url, Invocation invocation) {
+        // 如果无消费者匹配规则，则返回true，如果有继续匹配消费者url规则
         return CollectionUtils.isEmptyMap(whenCondition) || matchCondition(whenCondition, url, null, invocation);
     }
 
