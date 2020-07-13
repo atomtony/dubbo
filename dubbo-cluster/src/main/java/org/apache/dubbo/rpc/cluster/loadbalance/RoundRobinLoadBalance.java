@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Round robin load balance.
  */
+// 加权轮询负载均衡
 public class RoundRobinLoadBalance extends AbstractLoadBalance {
     public static final String NAME = "roundrobin";
 
@@ -88,7 +89,9 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
 
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+        // group/interfacename:version.methodname
         String key = invokers.get(0).getUrl().getServiceKey() + "." + invocation.getMethodName();
+        // methodWeightMap缓存了所有方法的权重信息
         ConcurrentMap<String, WeightedRoundRobin> map = methodWeightMap.computeIfAbsent(key, k -> new ConcurrentHashMap<>());
         int totalWeight = 0;
         long maxCurrent = Long.MIN_VALUE;
@@ -96,31 +99,42 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
         Invoker<T> selectedInvoker = null;
         WeightedRoundRobin selectedWRR = null;
         for (Invoker<T> invoker : invokers) {
+            // 提供者标识
             String identifyString = invoker.getUrl().toIdentityString();
+            // 提供者权重
             int weight = getWeight(invoker, invocation);
+            // 每个方法提供者映射表，如果不存在则创建
             WeightedRoundRobin weightedRoundRobin = map.computeIfAbsent(identifyString, k -> {
                 WeightedRoundRobin wrr = new WeightedRoundRobin();
                 wrr.setWeight(weight);
                 return wrr;
             });
 
+            // 存在时，权重发生变化，重新设置
             if (weight != weightedRoundRobin.getWeight()) {
                 //weight changed
+                // 重新设置权重
+                // 设置当前累加权重为0
                 weightedRoundRobin.setWeight(weight);
             }
+            // 累加当前权重
             long cur = weightedRoundRobin.increaseCurrent();
+            // 更新时间
             weightedRoundRobin.setLastUpdate(now);
             if (cur > maxCurrent) {
                 maxCurrent = cur;
                 selectedInvoker = invoker;
                 selectedWRR = weightedRoundRobin;
             }
+            // 累加权重
             totalWeight += weight;
         }
         if (invokers.size() != map.size()) {
+            // 提供者列表和缓存的个数不一致时，对于超过60秒的移除操作。
             map.entrySet().removeIf(item -> now - item.getValue().getLastUpdate() > RECYCLE_PERIOD);
         }
         if (selectedInvoker != null) {
+            // 选中提供者后，减去所有权重，重新开始累加。
             selectedWRR.sel(totalWeight);
             return selectedInvoker;
         }
