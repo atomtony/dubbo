@@ -31,6 +31,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Note that if the performance of the machine is better than others, you can set a larger weight.
  * If the performance is not so good, you can set a smaller weight.
  */
+// 加权随机算法
 public class RandomLoadBalance extends AbstractLoadBalance {
 
     public static final String NAME = "random";
@@ -46,25 +47,26 @@ public class RandomLoadBalance extends AbstractLoadBalance {
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
         // Number of invokers
-        // 服务个数
         int length = invokers.size();
         // Every invoker has the same weight?
-        // 每个提供者都一样的权重
         boolean sameWeight = true;
         // the weight of every invokers
         // 缓存所有服务提供者权重
         int[] weights = new int[length];
         // the first invoker's weight
-        // 获取地一个
+        // 获取第一个服务提供者权重
         int firstWeight = getWeight(invokers.get(0), invocation);
+        // 缓存第一个服务提供这权重
         weights[0] = firstWeight;
         // The sum of weights
+        // 第一是计算总权重
+        // 第二是检测每个服务提供者的是否相同
         int totalWeight = firstWeight;
         for (int i = 1; i < length; i++) {
             int weight = getWeight(invokers.get(i), invocation);
             // save for later use
             weights[i] = weight;
-            // Sum
+            // 累加权重
             totalWeight += weight;
             if (sameWeight && weight != firstWeight) {
                 sameWeight = false;
@@ -84,6 +86,7 @@ public class RandomLoadBalance extends AbstractLoadBalance {
             }
         }
         // If all invokers have the same weight value or totalWeight=0, return evenly.
+        // 如果所有服务提供者权重值相同，此时直接随机返回一个即可
         return invokers.get(ThreadLocalRandom.current().nextInt(length));
     }
 
