@@ -16,13 +16,16 @@
  */
 package org.apache.dubbo.demo.provider;
 
-import com.google.common.collect.Lists;
+import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.ServiceConfig;
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
 import org.apache.dubbo.demo.DemoService;
+import org.apache.dubbo.registry.Registry;
+import org.apache.dubbo.registry.RegistryFactory;
 
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
@@ -43,21 +46,26 @@ public class Application {
     private static void startWithBootstrap() {
         ServiceConfig<DemoServiceImpl> service = new ServiceConfig<>();
         service.setInterface(DemoService.class);
-        service.setVersion("v1");
-        service.setGroup("goup1");
         service.setRef(new DemoServiceImpl());
 
+
+        // 方法1：注册中心配置
+        RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
+        Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://127.0.0.1:2181"));
+        registry.register(URL.valueOf("condition://0.0.0.0:20880/org.apache.dubbo.demo.DemoService?category=routers&dynamic=false&rule=" +
+                URL.encode("host = 127.0.0.1 => host = 127.0.0.1")));
+
+
+        // 方法2：注册中心配置
         RegistryConfig registryConfig1 = new RegistryConfig("zookeeper://127.0.0.1:2181");
-        RegistryConfig registryConfig2 = new RegistryConfig("zookeeper://127.0.0.1:2182");
-        RegistryConfig registryConfig3 = new RegistryConfig("zookeeper://127.0.0.1:2183");
 
 
         DubboBootstrap bootstrap = DubboBootstrap.getInstance();
         ProtocolConfig protocolConfig = new ProtocolConfig();
-        protocolConfig.setPort(20881);
+        protocolConfig.setPort(20880);
         bootstrap.protocol(protocolConfig);
         bootstrap.application(new ApplicationConfig("dubbo-demo-api-provider"))
-                .registries(Arrays.asList(registryConfig1, registryConfig2, registryConfig3))
+                .registries(Arrays.asList(registryConfig1))
 //                .registry(new RegistryConfig("zookeeper://127.0.0.1:2182"))
 //                .registry(new RegistryConfig("zookeeper://127.0.0.1:2183"))
                 .service(service)

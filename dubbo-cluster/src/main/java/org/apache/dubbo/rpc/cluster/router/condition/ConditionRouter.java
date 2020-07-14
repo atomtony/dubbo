@@ -186,16 +186,19 @@ public class ConditionRouter extends AbstractRouter {
             if (!matchWhen(url, invocation)) {
                 return invokers;
             }
+            // 缓存提供者
             List<Invoker<T>> result = new ArrayList<Invoker<T>>();
             if (thenCondition == null) {
                 logger.warn("The current consumer in the service blacklist. consumer: " + NetUtils.getLocalHost() + ", service: " + url.getServiceKey());
                 return result;
             }
+            // 匹配提供者
             for (Invoker<T> invoker : invokers) {
                 if (matchThen(invoker.getUrl(), url)) {
                     result.add(invoker);
                 }
             }
+            // 返回结果
             if (!result.isEmpty()) {
                 return result;
             } else if (force) {
