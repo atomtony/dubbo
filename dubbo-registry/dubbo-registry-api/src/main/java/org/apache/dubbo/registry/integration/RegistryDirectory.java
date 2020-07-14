@@ -233,13 +233,17 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
                 .filter(this::isNotCompatibleFor26x)
                 .collect(Collectors.groupingBy(this::judgeCategory));
 
+        // 获取配置URLs
         List<URL> configuratorURLs = categoryUrls.getOrDefault(CONFIGURATORS_CATEGORY, Collections.emptyList());
         this.configurators = Configurator.toConfigurators(configuratorURLs).orElse(this.configurators);
 
+        // 获取路由URLs
         List<URL> routerURLs = categoryUrls.getOrDefault(ROUTERS_CATEGORY, Collections.emptyList());
+        // 根据URl转为Router对象，然后添加到路由链中
         toRouters(routerURLs).ifPresent(this::addRouters);
 
         // providers
+        // 获取提供者URLs
         List<URL> providerURLs = categoryUrls.getOrDefault(PROVIDERS_CATEGORY, Collections.emptyList());
         /**
          * 3.x added for extend URL address
@@ -268,6 +272,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     private void refreshOverrideAndInvoker(List<URL> urls) {
         // mock zookeeper://xxx?mock=return null
         overrideDirectoryUrl();
+        // 刷新调用者
         refreshInvoker(urls);
     }
 
@@ -383,8 +388,10 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
                 url = url.setProtocol(routerType);
             }
             try {
+                // 跟觉协议获取路由
                 Router router = ROUTER_FACTORY.getRouter(url);
                 if (!routers.contains(router)) {
+                    // 添加路由
                     routers.add(router);
                 }
             } catch (Throwable t) {

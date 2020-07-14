@@ -52,7 +52,7 @@ public class Application {
         // 方法1：注册中心配置
         RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
         Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://127.0.0.1:2181"));
-        registry.register(URL.valueOf("condition://0.0.0.0:20880/org.apache.dubbo.demo.DemoService?category=routers&dynamic=false&rule=" +
+        registry.register(URL.valueOf("condition://0.0.0.0/org.apache.dubbo.demo.DemoService?category=routers&dynamic=false&rule=" +
                 URL.encode("host = 127.0.0.1 => host = 127.0.0.1")));
 
 

@@ -160,12 +160,14 @@ public class ExtensionLoader<T> {
             throw new IllegalArgumentException("Extension type (" + type +
                     ") is not an extension, because it is NOT annotated with @" + SPI.class.getSimpleName() + "!");
         }
-
+        // 根据类型获取扩展加载器
         ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
+        // 加载机器不存在则创建
         if (loader == null) {
             EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<T>(type));
             loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
         }
+        // 返回加载器
         return loader;
     }
 
@@ -436,6 +438,9 @@ public class ExtensionLoader<T> {
      * @return non-null
      */
     public T getOrDefaultExtension(String name) {
+        // 1. 根据名称判断扩展类是否存在
+        // 2. 存在创建扩展类对象
+        // 3. 创建默认的扩展类对象
         return containsExtension(name) ? getExtension(name) : getDefaultExtension();
     }
 
@@ -630,6 +635,7 @@ public class ExtensionLoader<T> {
                 EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.newInstance());
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             }
+            // 扩展类中注入依赖对象
             injectExtension(instance);
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
             if (CollectionUtils.isNotEmpty(wrapperClasses)) {
@@ -646,6 +652,7 @@ public class ExtensionLoader<T> {
     }
 
     private boolean containsExtension(String name) {
+        // 获取扩展类
         return getExtensionClasses().containsKey(name);
     }
 
@@ -656,25 +663,33 @@ public class ExtensionLoader<T> {
         }
 
         try {
+            // 遍历对象方法
             for (Method method : instance.getClass().getMethods()) {
+                // 查看是否为set方法，用来注入依赖对象
                 if (!isSetter(method)) {
                     continue;
                 }
                 /**
                  * Check {@link DisableInject} to see if we need auto injection for this property
                  */
+                // 被DisableInject注解的方法不注入对象
                 if (method.getAnnotation(DisableInject.class) != null) {
                     continue;
                 }
+                // 获取注入方法参数类型
                 Class<?> pt = method.getParameterTypes()[0];
+                // 判断是否为基本类型
                 if (ReflectUtils.isPrimitives(pt)) {
                     continue;
                 }
 
                 try {
+                    // 获取属性名称
                     String property = getSetterProperty(method);
+                    // 属性对象
                     Object object = objectFactory.getExtension(pt, property);
                     if (object != null) {
+                        // 调用set方法，注入属性
                         method.invoke(instance, object);
                     }
                 } catch (Exception e) {
@@ -736,6 +751,7 @@ public class ExtensionLoader<T> {
             synchronized (cachedClasses) {
                 classes = cachedClasses.get();
                 if (classes == null) {
+                    // 加载SPI扩展
                     classes = loadExtensionClasses();
                     cachedClasses.set(classes);
                 }
@@ -748,11 +764,13 @@ public class ExtensionLoader<T> {
      * synchronized in getExtensionClasses
      */
     private Map<String, Class<?>> loadExtensionClasses() {
+        // 缓存默认扩展名称
         cacheDefaultExtensionName();
 
         Map<String, Class<?>> extensionClasses = new HashMap<>();
 
         for (LoadingStrategy strategy : strategies) {
+            // 根据类名加载所有扩展类
             loadDirectory(extensionClasses, strategy.directory(), type.getName(), strategy.preferExtensionClassLoader(), strategy.overridden(), strategy.excludedPackages());
             loadDirectory(extensionClasses, strategy.directory(), type.getName().replace("org.apache", "com.alibaba"), strategy.preferExtensionClassLoader(), strategy.overridden(), strategy.excludedPackages());
         }
@@ -764,18 +782,23 @@ public class ExtensionLoader<T> {
      * extract and cache default extension name if exists
      */
     private void cacheDefaultExtensionName() {
+        // 获取SPI注解
         final SPI defaultAnnotation = type.getAnnotation(SPI.class);
         if (defaultAnnotation == null) {
             return;
         }
 
+        // 获取注解值
         String value = defaultAnnotation.value();
         if ((value = value.trim()).length() > 0) {
+            // 根据逗号分割注解值
             String[] names = NAME_SEPARATOR.split(value);
+            // 注解了多个名称是违法的
             if (names.length > 1) {
                 throw new IllegalStateException("More than 1 default extension name on extension " + type.getName()
                         + ": " + Arrays.toString(names));
             }
+            // 注解了一个名称，这个是默认的
             if (names.length == 1) {
                 cachedDefaultName = names[0];
             }

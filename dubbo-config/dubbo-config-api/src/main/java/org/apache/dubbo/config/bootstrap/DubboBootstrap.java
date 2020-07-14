@@ -510,8 +510,10 @@ public class DubboBootstrap extends GenericEventListener {
 
         ApplicationModel.initFrameworkExts();
 
+        // 启动配置中心
         startConfigCenter();
 
+        // 如果注册了配置中心，则启用注册的配置中心
         useRegistryAsConfigCenterIfNecessary();
 
         loadRemoteConfigs();
@@ -592,7 +594,9 @@ public class DubboBootstrap extends GenericEventListener {
         if (CollectionUtils.isEmpty(configCenters)) {
             ConfigCenterConfig configCenterConfig = new ConfigCenterConfig();
             configCenterConfig.refresh();
+            // 检查配置中心地址是否有效
             if (configCenterConfig.isValid()) {
+                // 如果配置中心有效，添加注册中欧给你新
                 configManager.addConfigCenter(configCenterConfig);
                 configCenters = configManager.getConfigCenters();
             }
@@ -652,6 +656,7 @@ public class DubboBootstrap extends GenericEventListener {
         configManager.getDefaultRegistries().stream()
                 .filter(registryConfig -> registryConfig.getUseAsConfigCenter() == null || registryConfig.getUseAsConfigCenter())
                 .forEach(registryConfig -> {
+                    // 使用注册中心作为配置中心
                     String protocol = registryConfig.getProtocol();
                     String id = "config-center-" + protocol + "-" + registryConfig.getPort();
                     ConfigCenterConfig cc = new ConfigCenterConfig();

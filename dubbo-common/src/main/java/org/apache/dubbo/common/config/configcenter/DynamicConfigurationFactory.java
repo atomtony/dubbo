@@ -39,8 +39,13 @@ public interface DynamicConfigurationFactory {
      * @see 2.7.4
      */
     static DynamicConfigurationFactory getDynamicConfigurationFactory(String name) {
+        // 获取动态配置工厂类
         Class<DynamicConfigurationFactory> factoryClass = DynamicConfigurationFactory.class;
+        // 根据工厂类，加载所有的工厂类
         ExtensionLoader<DynamicConfigurationFactory> loader = getExtensionLoader(factoryClass);
+        // 这个方法比较重要
+        // 1. 加载扩展类
+        // 2. 根据名称返回扩展对象，如果名称不存在则返回默认扩展对象
         return loader.getOrDefaultExtension(name);
     }
 }

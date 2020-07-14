@@ -182,11 +182,11 @@ public class ConditionRouter extends AbstractRouter {
             return invokers;
         }
         try {
-            // 未匹配到消费者，则返回所有提供者
+            // 未匹配到消费者，则返回所有提供者,说明不再规则内，所有的提供者都可用
             if (!matchWhen(url, invocation)) {
                 return invokers;
             }
-            // 缓存提供者
+            // 缓存匹配到的提供者
             List<Invoker<T>> result = new ArrayList<Invoker<T>>();
             if (thenCondition == null) {
                 logger.warn("The current consumer in the service blacklist. consumer: " + NetUtils.getLocalHost() + ", service: " + url.getServiceKey());

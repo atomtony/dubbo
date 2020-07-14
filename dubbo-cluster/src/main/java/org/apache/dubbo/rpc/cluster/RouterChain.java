@@ -62,6 +62,7 @@ public class RouterChain<T> {
      * FIXME: this method should not be public
      */
     public void initWithRouters(List<Router> builtinRouters) {
+        // 初始化路由规则
         this.builtinRouters = builtinRouters;
         this.routers = new ArrayList<>(builtinRouters);
         this.sort();
@@ -76,6 +77,7 @@ public class RouterChain<T> {
      * @param routers routers from 'router://' rules in 2.6.x or before.
      */
     public void addRouters(List<Router> routers) {
+        // 添加路由规则
         List<Router> newRouters = new ArrayList<>();
         newRouters.addAll(builtinRouters);
         newRouters.addAll(routers);
@@ -94,6 +96,7 @@ public class RouterChain<T> {
      * @return
      */
     public List<Invoker<T>> route(URL url, Invocation invocation) {
+        // 根据路由规则，过滤出符合的提供者
         List<Invoker<T>> finalInvokers = invokers;
         for (Router router : routers) {
             finalInvokers = router.route(finalInvokers, url, invocation);
@@ -105,6 +108,7 @@ public class RouterChain<T> {
      * Notify router chain of the initial addresses from registry at the first time.
      * Notify whenever addresses in registry change.
      */
+    // 更新提供者
     public void setInvokers(List<Invoker<T>> invokers) {
         this.invokers = (invokers == null ? Collections.emptyList() : invokers);
         routers.forEach(router -> router.notify(this.invokers));
