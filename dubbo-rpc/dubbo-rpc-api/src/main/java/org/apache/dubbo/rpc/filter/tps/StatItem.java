@@ -44,15 +44,20 @@ class StatItem {
 
     public boolean isAllowable() {
         long now = System.currentTimeMillis();
+        // 间隔时间超过 interval 重置令牌数
         if (now > lastResetTime + interval) {
+            // 重置令牌数
             token = buildLongAdder(rate);
             lastResetTime = now;
         }
 
+        // 没有令牌，返回fase，不允许访问
         if (token.sum() < 0) {
             return false;
         }
+        // 令牌数减1
         token.decrement();
+        // 返回允许访问
         return true;
     }
 

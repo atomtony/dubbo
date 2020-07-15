@@ -18,16 +18,15 @@ package org.apache.dubbo.demo.provider;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.ExtensionLoader;
-import org.apache.dubbo.config.ApplicationConfig;
-import org.apache.dubbo.config.ProtocolConfig;
-import org.apache.dubbo.config.RegistryConfig;
-import org.apache.dubbo.config.ServiceConfig;
+import org.apache.dubbo.config.*;
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
 import org.apache.dubbo.demo.DemoService;
 import org.apache.dubbo.registry.Registry;
 import org.apache.dubbo.registry.RegistryFactory;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 public class Application {
@@ -47,14 +46,37 @@ public class Application {
         ServiceConfig<DemoServiceImpl> service = new ServiceConfig<>();
         service.setInterface(DemoService.class);
         service.setRef(new DemoServiceImpl());
+        /**
+         * 设置token使能
+         * 设置为true会自动加载token过滤器
+         * @see org.apache.dubbo.rpc.filter.TokenFilter
+         */
+        service.setToken(true);
+
+
+        Map<String, String> params = new HashMap<>();
+        /**
+         * 设置限流器
+         * 需要在resources文件下配置META-INF.dubbo/internal/org.apache.dubbo.rpc.Filter
+         * 配置内容是：tps=org.apache.dubbo.rpc.filter.TpsLimitFilter
+         * 参考网址 https://blog.csdn.net/zwjyyy1203/article/details/92775226
+         * 参考网址 https://blog.csdn.net/Andyzhu_2005/article/details/83997806
+         * 网址参考 https://www.cnblogs.com/luozhiyun/p/10960593.html
+         * @see org.apache.dubbo.rpc.filter.TpsLimitFilter
+         */
+        params.put("tps", "5");
+        params.put("tps.interval","1000");
+        service.setParameters(params);
+        service.setFilter("tps");
 
 
         // 方法1：注册中心配置
-        RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
-        Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://127.0.0.1:2181"));
-        registry.register(URL.valueOf("condition://0.0.0.0/org.apache.dubbo.demo.DemoService?category=routers&dynamic=false&rule=" +
-                URL.encode("host = 127.0.0.1 => host = 127.0.0.1")));
-
+        {
+            RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
+            Registry registry = registryFactory.getRegistry(URL.valueOf("zookeeper://127.0.0.1:2181"));
+            registry.register(URL.valueOf("condition://0.0.0.0/org.apache.dubbo.demo.DemoService?category=routers&dynamic=false&rule=" +
+                    URL.encode("host = 127.0.0.1 => host = 127.0.0.1")));
+        }
 
         // 方法2：注册中心配置
         RegistryConfig registryConfig1 = new RegistryConfig("zookeeper://127.0.0.1:2181");

@@ -38,7 +38,9 @@ public class DefaultTPSLimiter implements TPSLimiter {
 
     @Override
     public boolean isAllowable(URL url, Invocation invocation) {
+        // 获取tps这个参数的大小
         int rate = url.getParameter(TPS_LIMIT_RATE_KEY, -1);
+        // 获取tps.interval这个参数的大小，默认60秒
         long interval = url.getParameter(TPS_LIMIT_INTERVAL_KEY, DEFAULT_TPS_LIMIT_INTERVAL);
         String serviceKey = url.getServiceKey();
         if (rate > 0) {
@@ -48,11 +50,13 @@ public class DefaultTPSLimiter implements TPSLimiter {
                 statItem = stats.get(serviceKey);
             } else {
                 //rate or interval has changed, rebuild
+                // 检测 rate 和 interval 这两值是否发生变化，发生变化则重新创建爱你
                 if (statItem.getRate() != rate || statItem.getInterval() != interval) {
                     stats.put(serviceKey, new StatItem(serviceKey, rate, interval));
                     statItem = stats.get(serviceKey);
                 }
             }
+            // 返回是否允许访问
             return statItem.isAllowable();
         } else {
             StatItem statItem = stats.get(serviceKey);
