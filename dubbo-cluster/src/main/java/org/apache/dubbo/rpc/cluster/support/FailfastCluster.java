@@ -22,7 +22,8 @@ import org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster;
 
 /**
  * {@link FailfastClusterInvoker}
- *
+ * 快速失败集群容错
+ * 只发起一次调用，如果发生失败，则立即抛出异常，不再尝试调用
  */
 public class FailfastCluster extends AbstractCluster {
 

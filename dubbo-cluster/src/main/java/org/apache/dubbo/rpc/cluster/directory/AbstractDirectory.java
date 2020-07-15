@@ -58,7 +58,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         if (url == null) {
             throw new IllegalArgumentException("url == null");
         }
-
+        // 移除 refer 和 monitor 参数
         this.url = url.removeParameter(REFER_KEY).removeParameter(MONITOR_KEY);
         this.consumerUrl = url.addParameters(StringUtils.parseQueryString(url.getParameterAndDecoded(REFER_KEY)))
                 .removeParameter(MONITOR_KEY);

@@ -30,7 +30,9 @@ import java.util.List;
 
 /**
  * BroadcastClusterInvoker
+ * 广播集群容错
  *
+ * 逐个调用么个服务提供者，如果其中一台报错，在循环结束后，抛出异常。该类通常用于通知所有提供者更新缓存或日志等本地资源信息
  */
 public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -47,17 +49,22 @@ public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
         RpcContext.getContext().setInvokers((List) invokers);
         RpcException exception = null;
         Result result = null;
+        // 遍历调用者
         for (Invoker<T> invoker : invokers) {
             try {
+                // 开始调用
                 result = invoker.invoke(invocation);
             } catch (RpcException e) {
+                // 记录异常
                 exception = e;
                 logger.warn(e.getMessage(), e);
             } catch (Throwable e) {
+                // 包装异常
                 exception = new RpcException(e.getMessage(), e);
                 logger.warn(e.getMessage(), e);
             }
         }
+        // 只要有一个异常，则抛出异常。
         if (exception != null) {
             throw exception;
         }

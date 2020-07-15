@@ -33,7 +33,9 @@ import java.util.List;
  * Usually used to write audit logs and other operations
  *
  * <a href="http://en.wikipedia.org/wiki/Fail-safe">Fail-safe</a>
- *
+ * 失败安全集群容错
+ * 所谓的失败安全是指，当调用过程中出现异常时，调用者仅会打印异常，而不会抛出异常。
+ * 适用于写入审计日志等操作
  */
 public class FailsafeClusterInvoker<T> extends AbstractClusterInvoker<T> {
     private static final Logger logger = LoggerFactory.getLogger(FailsafeClusterInvoker.class);

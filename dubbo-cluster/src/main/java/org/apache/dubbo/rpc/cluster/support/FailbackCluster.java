@@ -22,7 +22,7 @@ import org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster;
 
 /**
  * {@link FailbackClusterInvoker}
- *
+ * 失败自动恢复集群容错
  */
 public class FailbackCluster extends AbstractCluster {
 
@@ -30,6 +30,7 @@ public class FailbackCluster extends AbstractCluster {
 
     @Override
     public <T> AbstractClusterInvoker<T> doJoin(Directory<T> directory) throws RpcException {
+        // 创建并返回 FailbackClusterInvoker 对象
         return new FailbackClusterInvoker<>(directory);
     }
 
