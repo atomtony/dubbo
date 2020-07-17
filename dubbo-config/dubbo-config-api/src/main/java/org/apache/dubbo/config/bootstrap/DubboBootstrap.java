@@ -953,7 +953,7 @@ public class DubboBootstrap extends GenericEventListener {
                 });
                 asyncExportingFutures.add(future);
             } else {
-                // 同步暴露服务
+                // 暴露服务，可以是同步，可以延迟暴露
                 sc.export();
                 exportedServices.add(sc);
             }

@@ -46,6 +46,7 @@ public class Application {
         ServiceConfig<DemoServiceImpl> service = new ServiceConfig<>();
         service.setInterface(DemoService.class);
         service.setRef(new DemoServiceImpl());
+        service.setDelay(5000);
         /**
          * 设置token使能
          * 设置为true会自动加载token过滤器
@@ -56,7 +57,7 @@ public class Application {
 
         Map<String, String> params = new HashMap<>();
         /**
-         * 设置限流器
+         * 设置限流器，可以作用于调用端和服务端
          * 需要在resources文件下配置META-INF.dubbo/internal/org.apache.dubbo.rpc.Filter
          * 配置内容是：tps=org.apache.dubbo.rpc.filter.TpsLimitFilter
          * 参考网址 https://blog.csdn.net/zwjyyy1203/article/details/92775226
@@ -65,7 +66,7 @@ public class Application {
          * @see org.apache.dubbo.rpc.filter.TpsLimitFilter
          */
         params.put("tps", "5");
-        params.put("tps.interval","1000");
+        params.put("tps.interval", "1000");
         service.setParameters(params);
         service.setFilter("tps");
 
@@ -81,18 +82,21 @@ public class Application {
         // 方法2：注册中心配置
         RegistryConfig registryConfig1 = new RegistryConfig("zookeeper://127.0.0.1:2181");
 
-
+        ApplicationConfig applicationConfig = new ApplicationConfig("dubbo-demo-api-provider");
+        applicationConfig.setShutwait("60000");
         DubboBootstrap bootstrap = DubboBootstrap.getInstance();
+
         ProtocolConfig protocolConfig = new ProtocolConfig();
         protocolConfig.setPort(20880);
         bootstrap.protocol(protocolConfig);
-        bootstrap.application(new ApplicationConfig("dubbo-demo-api-provider"))
+        bootstrap.application(applicationConfig)
                 .registries(Arrays.asList(registryConfig1))
 //                .registry(new RegistryConfig("zookeeper://127.0.0.1:2182"))
 //                .registry(new RegistryConfig("zookeeper://127.0.0.1:2183"))
                 .service(service)
                 .start()
                 .await();
+
     }
 
     private static void startWithExport() throws InterruptedException {
